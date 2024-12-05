@@ -15,6 +15,18 @@
 
 enum log_level _log_current_level = LOG_DEFAULT_LEVEL;
 
+#ifndef LOG_NO_FREERTOS
+#include <semphr.h>
+SemaphoreHandle_t _log_semaphore;
+char _log_semaphore_created=0;
+#define _LOG_SM_TAKE xSemaphoreTake(_log_semaphore, portMAX_DELAY)
+#define _LOG_SM_GIVE xSemaphoreGive(_log_semaphore)
+#else 
+#define _LOG_SM_TAKE
+#define _LOG_SM_GIVE
+#endif
+
+
 void _log_debug(const char* msg, const char *file, const char *func, int line)
 {
   char location_msg[0xFF];
@@ -67,6 +79,16 @@ void _log(enum log_level lvl, const char *msg, const char *file, const char *fun
   if(lvl<_log_current_level)
     return;
 
+  #ifndef LOG_NO_FREERTOS
+  if(!_log_semaphore_created)
+  {
+    _log_semaphore = xSemaphoreCreateMutex();
+    _log_semaphore_created=1;
+  }
+  #endif
+
+  _LOG_SM_TAKE;
+
   char msgbuff[LOG_MAX_MSG_SIZE];
 
   va_list vargs;
@@ -96,6 +118,7 @@ void _log(enum log_level lvl, const char *msg, const char *file, const char *fun
       break;
   }
 
+  _LOG_SM_GIVE;
 
   return;
 }
