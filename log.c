@@ -13,6 +13,8 @@
 
 #include "log.h"
 
+enum log_level _log_current_level = LOG_DEFAULT_LEVEL;
+
 void _log_debug(const char* msg, const char *file, const char *func, int line)
 {
   char location_msg[0xFF];
@@ -57,11 +59,14 @@ void _log_critical(const char* msg, const char *file, const char *func, int line
 
 void log_setlevel(enum log_level lvl)
 {
-
+  _log_current_level = lvl;
 }
 
 void _log(enum log_level lvl, const char *msg, const char *file, const char *func, int line, ...)
 {
+  if(lvl<_log_current_level)
+    return;
+
   char msgbuff[LOG_MAX_MSG_SIZE];
 
   va_list vargs;

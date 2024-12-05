@@ -23,7 +23,14 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#ifndef LOG_DEFAULT_LEVEL
+#define LOG_DEFAULT_LEVEL LOG_DEBUG
+#endif 
+
+#ifndef LOG_MAX_MSG_SIZE
 #define LOG_MAX_MSG_SIZE  128
+#endif
+
 #define _LOG_LOCATION __FILE__, __func__, __LINE__
 /**
  * @brief Logs your message in printf style. Example usage: LOGF(LOG_DEBUG, "HELLO!", 0); (a placeholder 0 has to be placed when no variables are used.)
